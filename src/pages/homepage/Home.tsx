@@ -1,3 +1,4 @@
+import AboutUs from "@/modules/home/AboutUs";
 import Banner from "../../modules/home/Banner";
 import Hero from "../../modules/home/Hero";
 import HowItWork from "../../modules/home/HowItWork";
@@ -16,6 +17,9 @@ const Home = () => {
       </div>
       <div>
         <Banner />
+      </div>
+      <div id="about-us">
+        <AboutUs />
       </div>
       <div>
         <ServicesNew />

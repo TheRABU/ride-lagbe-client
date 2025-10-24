@@ -30,8 +30,11 @@ const ServicesNew = () => {
 
   return (
     <>
-      <div className="h-screen flex justify-center items-center bg-black">
-        <section className="grid grid-cols-2 gap-6 w-full sm:max-w-2xl">
+      <div className="min-h-md mx-auto bg-black px-2">
+        <h2 className="block w-full text-center mb-4 py-5 bg-gradient-to-b from-white to-gray-400 bg-clip-text font-bold text-transparent text-3xl sm:text-4xl">
+          Choose the premium packages
+        </h2>
+        <section className="grid mx-auto mt-16 grid-cols-2 gap-6 w-full sm:max-w-2xl">
           {services.map((service) => (
             <div
               key={service.id}
