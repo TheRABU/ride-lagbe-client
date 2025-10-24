@@ -3,7 +3,7 @@ import taxi from "../../assets/taxi.jpg";
 const Hero = () => {
   return (
     <>
-      <div className="px-1 relative ">
+      <div className=" relative ">
         <section className="rounded-t-4xl max-h-min lg:min-h-min mx-auto w-full bg-[#131010] flex items-center justify-center pt-16">
           <section className="text-white body-font">
             <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
@@ -33,7 +33,6 @@ const Hero = () => {
                   src={taxi}
                 />
               </div>
-              <div className="h-24 w-5/6 lg:min-w-7xl -bottom-10 bg-neutral-400 absolute mx-auto rounded-md"></div>
             </div>
           </section>
         </section>

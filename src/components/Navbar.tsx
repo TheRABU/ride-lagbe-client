@@ -1,8 +1,8 @@
 const Navbar = () => {
   return (
     <>
-      <div className="wrapper px-1 lg:px-5 py-3">
-        <section className="bg-[#1E201E] flex justify-between items-center p-6 h-12 w-full text-white font-bold rounded-3xl shadow-md mx-auto">
+      <div className="wrapper px-1 lg:px-5 py-9 relative">
+        <section className="bg-[#1E201E]/80 backdrop-blur-2xl fixed top-0 left-0 right-0 z-50 mt-3 flex justify-between items-center p-6 h-12 w-full text-white font-bold rounded-3xl shadow-md mx-auto max-w-7xl">
           <div className="logo">
             <h1 className="text-2xl font-bold">Ride Lagbe</h1>
           </div>

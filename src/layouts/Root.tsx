@@ -1,20 +1,19 @@
-import { Outlet } from "react-router"
-import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
-
+import { Outlet } from "react-router";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const Root = () => {
   return (
     <>
-    <div className="flex flex-col bg-[#FAF7F3]">
+      <div className="flex flex-col bg-[#FAF7F3]">
         <Navbar />
         <div className="min-h-[calc(100vh-136px)]">
-            <Outlet />
+          <Outlet />
         </div>
         <Footer />
-    </div>
+      </div>
     </>
-  )
-}
+  );
+};
 
-export default Root
+export default Root;
