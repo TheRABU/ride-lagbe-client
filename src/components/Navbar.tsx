@@ -3,6 +3,7 @@ import { BsFillMenuButtonWideFill } from "react-icons/bs";
 import { BsMenuButtonFill } from "react-icons/bs";
 import { useState } from "react";
 import UserDropdown from "./UserDropdown";
+import { ModeToggle } from "./mode.toggle";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -53,6 +54,9 @@ const Navbar = () => {
                 Sign Up
               </button>
             </Link>
+          </div>
+          <div className="ml-2">
+            <ModeToggle />
           </div>
           <div>
             <UserDropdown />
