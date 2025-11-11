@@ -4,6 +4,8 @@ import Root from "../layouts/Root";
 import AuthLayout from "@/layouts/AuthLayout";
 import SignUp from "@/pages/sign-up/SignUp";
 import SignIn from "@/pages/sign-in/SignIn";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import UserDashboard from "@/pages/dashboard/user-dashboard/UserDashboard";
 
 const AllRoutes = () => {
   const routes = createBrowserRouter([
@@ -28,6 +30,16 @@ const AllRoutes = () => {
         {
           path: "/auth/login",
           element: <SignIn />,
+        },
+      ],
+    },
+    {
+      path: "dashboard",
+      element: <DashboardLayout />,
+      children: [
+        {
+          path: "/dashboard/user",
+          element: <UserDashboard />,
         },
       ],
     },

@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
+import backgroundImg from "../../assets/background.svg";
 
 const SignIn = () => {
   const [showPass, setShowPass] = useState(false);
@@ -9,13 +10,7 @@ const SignIn = () => {
     <>
       <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
         <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-          <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
-            <div>
-              <img
-                src="https://drive.google.com/uc?export=view&id=1MFiKAExRFF0-2YNpAZzIu1Sh52J8r16v"
-                className="w-mx-auto"
-              />
-            </div>
+          <div className="w-full lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
             <div className="mt-12 flex flex-col items-center">
               <div className="w-full flex-1 mt-8">
                 <div className="flex flex-col items-center">
@@ -97,13 +92,9 @@ const SignIn = () => {
             </div>
           </div>
           <div className="flex-1 bg-green-100 text-center hidden lg:flex">
-            <div
-              className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
-              style={{
-                backgroundImage:
-                  "background-image: url('https://drive.google.com/uc?export=view&id=1KZ_Ub_2lZ0dHbKV0fAIhxVhiQA183RCz');",
-              }}
-            ></div>
+            <div className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat">
+              <img src={backgroundImg} alt="" />
+            </div>
           </div>
         </div>
       </div>

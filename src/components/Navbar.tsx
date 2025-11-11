@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { BsFillMenuButtonWideFill } from "react-icons/bs";
 import { BsMenuButtonFill } from "react-icons/bs";
 import { useState } from "react";
+import UserDropdown from "./UserDropdown";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -52,6 +53,9 @@ const Navbar = () => {
                 Sign Up
               </button>
             </Link>
+          </div>
+          <div>
+            <UserDropdown />
           </div>
           <div>
             <button
