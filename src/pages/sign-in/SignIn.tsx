@@ -2,10 +2,45 @@ import { Link } from "react-router";
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import backgroundImg from "../../assets/background.svg";
+import { useForm } from "react-hook-form";
+
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "Name must be at least 2 characters long" })
+    .max(50, { message: "Name cannot exceed 50 characters" }),
+  email: z.email({ message: "Please enter a valid email address" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" })
+    .max(50, { message: "Password cannot exceed 50 characters" }),
+});
 
 const SignIn = () => {
   const [showPass, setShowPass] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log("Form Data:", data);
+    reset();
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
@@ -45,20 +80,38 @@ const SignIn = () => {
                   </div>
                 </div>
 
-                <div className="mx-auto max-w-xs">
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="mx-auto max-w-xs"
+                >
                   <input
-                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    className={`w-full px-8 py-4 my-4 rounded-lg font-medium bg-gray-100 border ${
+                      errors.email ? "border-red-400" : "border-gray-200"
+                    } placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white`}
                     type="email"
                     placeholder="Email"
+                    {...register("email")}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.email.message}
+                    </p>
+                  )}
                   <div className="relative mt-5">
                     <input
                       className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                       type={showPass ? "text" : "password"}
                       placeholder="Password"
+                      {...register("password")}
                     />
+                    {errors.password && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+
                     <button
-                      type="button"
+                      type="submit"
                       onClick={() => setShowPass(!showPass)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     >
@@ -87,7 +140,7 @@ const SignIn = () => {
                       <Link to={"/auth/sign-up"}>Sing Up</Link>
                     </span>
                   </p>
-                </div>
+                </form>
               </div>
             </div>
           </div>
