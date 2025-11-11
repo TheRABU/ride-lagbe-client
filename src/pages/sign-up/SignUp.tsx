@@ -1,10 +1,12 @@
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 import backgroundImg from "../../assets/background.svg";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import Swal from "sweetalert2";
 
 const formSchema = z.object({
   name: z
@@ -20,12 +22,17 @@ const formSchema = z.object({
 
 const SignUp = () => {
   const [showPass, setShowPass] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/";
+
+  const [registerUser] = useRegisterMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,9 +42,29 @@ const SignUp = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log("Form Data:", data);
-    reset();
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const userInfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      const result = await registerUser(userInfo).unwrap();
+      if (result.statusCode === 201) {
+        Swal.fire({
+          position: "top-start",
+          icon: "success",
+          title: "Your work has been saved",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+      navigate(from, { replace: true });
+      console.log("result of signup", result);
+    } catch (error: any) {
+      console.log("Error at::", error.message);
+    }
   };
 
   return (

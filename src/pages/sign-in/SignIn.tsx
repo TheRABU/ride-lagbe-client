@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
@@ -6,12 +6,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import backgroundImg from "../../assets/background.svg";
 import { useForm } from "react-hook-form";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters long" })
-    .max(50, { message: "Name cannot exceed 50 characters" }),
   email: z.email({ message: "Please enter a valid email address" }),
   password: z
     .string()
@@ -21,6 +18,11 @@ const formSchema = z.object({
 
 const SignIn = () => {
   const [showPass, setShowPass] = useState(false);
+  const [loginUser] = useLoginMutation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/";
 
   const {
     register,
@@ -30,15 +32,25 @@ const SignIn = () => {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log("Form Data:", data);
-    reset();
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const userInfo = {
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      const result = await loginUser(userInfo);
+      navigate(from, { replace: true });
+      console.log("Form Data:", result);
+      reset();
+    } catch (error: any) {
+      console.error(error.message);
+    }
   };
 
   return (
@@ -111,14 +123,16 @@ const SignIn = () => {
                     )}
 
                     <button
-                      type="submit"
                       onClick={() => setShowPass(!showPass)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     >
                       {showPass ? <FaEye /> : <FaEyeSlash />}
                     </button>
                   </div>
-                  <button className="mt-5 tracking-wide font-semibold bg-green-400 text-white-500 w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none">
+                  <button
+                    type="submit"
+                    className="mt-5 tracking-wide font-semibold bg-green-400 text-white-500 w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                  >
                     <svg
                       className="w-6 h-6 -ml-2"
                       fill="none"
