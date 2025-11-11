@@ -1,11 +1,44 @@
 import { Link } from "react-router";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 import backgroundImg from "../../assets/background.svg";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "Name must be at least 2 characters long" })
+    .max(50, { message: "Name cannot exceed 50 characters" }),
+  email: z.email({ message: "Please enter a valid email address" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" })
+    .max(50, { message: "Password cannot exceed 50 characters" }),
+});
 
 const SignUp = () => {
   const [showPass, setShowPass] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
+    reset();
+  };
 
   return (
     <>
@@ -46,22 +79,46 @@ const SignUp = () => {
                   </div>
                 </div>
 
-                <div className="mx-auto max-w-xs">
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="mx-auto max-w-xs"
+                >
                   <input
-                    className="w-full px-8 py-4 my-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    className={`w-full px-8 py-4 my-4 rounded-lg font-medium bg-gray-100 border ${
+                      errors.name ? "border-red-400" : "border-gray-200"
+                    } placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white`}
                     type="text"
                     placeholder="Name"
+                    {...register("name")}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.name.message}
+                    </p>
+                  )}
+
                   <input
-                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    className={`w-full px-8 py-4 my-4 rounded-lg font-medium bg-gray-100 border ${
+                      errors.email ? "border-red-400" : "border-gray-200"
+                    } placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white`}
                     type="email"
                     placeholder="Email"
+                    {...register("email")}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.email.message}
+                    </p>
+                  )}
+
                   <div className="relative mt-5">
                     <input
-                      className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                      className={`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border ${
+                        errors.password ? "border-red-400" : "border-gray-200"
+                      } placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white`}
                       type={showPass ? "text" : "password"}
                       placeholder="Password"
+                      {...register("password")}
                     />
                     <button
                       type="button"
@@ -71,36 +128,45 @@ const SignUp = () => {
                       {showPass ? <FaEye /> : <FaEyeSlash />}
                     </button>
                   </div>
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password.message}
+                    </p>
+                  )}
 
-                  <button className="mt-5 tracking-wide font-semibold bg-green-400 text-white-500 w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none">
+                  <button
+                    type="submit"
+                    className="mt-5 tracking-wide font-semibold bg-green-400 text-white w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                  >
                     <svg
                       className="w-6 h-6 -ml-2"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                       <circle cx="8.5" cy="7" r="4" />
                       <path d="M20 8v6M23 11h-6" />
                     </svg>
-                    <span className="ml-">Sign Up</span>
+                    <span className="ml-2">Sign Up</span>
                   </button>
 
                   <p className="mt-6 text-xs text-gray-600 text-center">
-                    Already have account? Login now
+                    Already have an account?
                     <span className="ml-2 font-semibold underline">
                       <Link to={"/auth/login"}>Log In</Link>
                     </span>
                   </p>
-                </div>
+                </form>
               </div>
             </div>
           </div>
+
           <div className="flex-1 bg-green-100 text-center hidden lg:flex">
             <div className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat">
-              <img src={backgroundImg} alt="" />
+              <img src={backgroundImg} alt="Background" />
             </div>
           </div>
         </div>
