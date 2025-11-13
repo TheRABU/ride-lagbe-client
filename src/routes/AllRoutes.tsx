@@ -6,6 +6,8 @@ import SignUp from "@/pages/sign-up/SignUp";
 import SignIn from "@/pages/sign-in/SignIn";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import UserDashboard from "@/pages/dashboard/user-dashboard/UserDashboard";
+import RideLayout from "@/layouts/RideLayout";
+import RideMap from "@/pages/ride/RideMap";
 
 const AllRoutes = () => {
   const routes = createBrowserRouter([
@@ -40,6 +42,16 @@ const AllRoutes = () => {
         {
           path: "/dashboard/user",
           element: <UserDashboard />,
+        },
+      ],
+    },
+    {
+      path: "ride",
+      element: <RideLayout />,
+      children: [
+        {
+          path: "/ride/request",
+          element: <RideMap />,
         },
       ],
     },

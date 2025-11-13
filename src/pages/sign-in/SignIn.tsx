@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import backgroundImg from "../../assets/background.svg";
 import { useForm } from "react-hook-form";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
+import { ToastContainer, toast } from "react-toastify";
 
 const formSchema = z.object({
   email: z.email({ message: "Please enter a valid email address" }),
@@ -19,6 +20,7 @@ const formSchema = z.object({
 const SignIn = () => {
   const [showPass, setShowPass] = useState(false);
   const [loginUser] = useLoginMutation();
+  const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,14 +44,24 @@ const SignIn = () => {
       email: data.email,
       password: data.password,
     };
-
+    setServerError("");
     try {
       const result = await loginUser(userInfo);
-      navigate(from, { replace: true });
+
+      if (result?.data?.statusCode === 201) {
+        toast.success("Logged in successfully!");
+        navigate(from, { replace: true });
+        reset();
+      } else if (result?.error) {
+        const msg = result.error?.data?.message || "Login failed. Try again.";
+        setServerError(msg);
+      }
+
       console.log("Form Data:", result);
       reset();
-    } catch (error: any) {
-      console.error(error.message);
+    } catch (error) {
+      console.error("Login error:", error);
+      setServerError("An unexpected error occurred. Try again later.");
     }
   };
 
@@ -129,6 +141,11 @@ const SignIn = () => {
                       {showPass ? <FaEye /> : <FaEyeSlash />}
                     </button>
                   </div>
+                  {serverError && (
+                    <p className="text-red-500 text-sm mt-3 text-center">
+                      {serverError}
+                    </p>
+                  )}
                   <button
                     type="submit"
                     className="mt-5 tracking-wide font-semibold bg-green-400 text-white-500 w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
@@ -165,6 +182,7 @@ const SignIn = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 };
