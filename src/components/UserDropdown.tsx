@@ -6,11 +6,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useLogoutMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "react-toastify";
 import { FaUser } from "react-icons/fa";
-import { Link } from "react-router";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router";
+import { baseApi } from "@/redux/baseApi";
 
 const UserDropdown = () => {
+  const [logout, { isLoading }] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const result = await logout(undefined);
+
+    if ("error" in result) {
+      const error = result.error as any;
+      toast.error(error.data?.message || "Failed to logout");
+    } else {
+      toast.success("Logged out successfully!");
+      dispatch(baseApi.util.resetApiState());
+      navigate("/");
+    }
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -25,10 +45,34 @@ const UserDropdown = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
             </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Team</DropdownMenuItem>
-            <DropdownMenuItem>Subscription</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to={"/dashboard/user/profile"} className="w-full">
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to={"/dashboard/user/billing"} className="w-full">
+                Billing
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to={"/dashboard/user/team"} className="w-full">
+                Team
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to={"/dashboard/user/subscription"} className="w-full">
+                Subscription
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              disabled={isLoading}
+              className="cursor-pointer hover:bg-red-600 focus:bg-red-600"
+            >
+              {isLoading ? "Logging out..." : "Logout"}
+            </DropdownMenuItem>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
