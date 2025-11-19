@@ -1,10 +1,3 @@
-/*
-
-
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTEzODE4OThkOWZkNjAyZTkxMGQyMGQiLCJlbWFpbCI6ImFzaGZhcUB1ZGRpbi5jb20iLCJuYW1lIjoiYXNoZmFxIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NjM1NjI1MTksImV4cCI6MTc2MzY0ODkxOX0.mIV61iFpkhtAXR0EaaznqE0Hr0TkqmAG5cBBrGSg2aQ"
-
-*/
-
 import React, { useEffect, useState } from "react";
 import {
   MapContainer,
@@ -19,6 +12,7 @@ import L from "leaflet";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRequestRideMutation } from "@/redux/features/rides/ride.api";
+import { toast } from "react-toastify";
 
 // Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -126,7 +120,7 @@ const RideMap: React.FC = () => {
         destLatitude: destination.lat,
         destLongitude: destination.lng,
       };
-      const result = await requestRide(rideInfo);
+      const result = await requestRide(rideInfo).unwrap();
 
       console.log("result from ride made:", result.data);
 
@@ -135,7 +129,15 @@ const RideMap: React.FC = () => {
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed to request ride");
+      if (error.data) {
+        // Backend sent a structured error response
+        toast.error(error.data.message || "Failed to request ride");
+      } else if (error.message) {
+        // Network or other error
+        toast.error(error.data.message);
+      } else {
+        toast.error("Failed to request ride");
+      }
     } finally {
       setLoading(false);
     }
