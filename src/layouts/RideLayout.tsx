@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 
 const RideLayout = () => {
   return (
-    <div className="bg-[#F3F3E0]">
+    <div className="bg-[#FAF7F0]">
       <Navbar />
       <Outlet />
     </div>

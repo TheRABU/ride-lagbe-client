@@ -1,3 +1,10 @@
+/*
+
+
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTEzODE4OThkOWZkNjAyZTkxMGQyMGQiLCJlbWFpbCI6ImFzaGZhcUB1ZGRpbi5jb20iLCJuYW1lIjoiYXNoZmFxIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NjM1NjI1MTksImV4cCI6MTc2MzY0ODkxOX0.mIV61iFpkhtAXR0EaaznqE0Hr0TkqmAG5cBBrGSg2aQ"
+
+*/
+
 import React, { useEffect, useState } from "react";
 import {
   MapContainer,
@@ -11,6 +18,7 @@ import axios from "axios";
 import L from "leaflet";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRequestRideMutation } from "@/redux/features/rides/ride.api";
 
 // Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -33,8 +41,14 @@ const RideMap: React.FC = () => {
   const [destinationName, setDestinationName] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
+  const [requestRide] = useRequestRideMutation();
+
   // Reverse geocoding
-  const getLocationName = async (lat: number, lng: number): Promise<string> => {
+
+  /*
+    this is to get the location's latitude and longitude and get real time name of that place
+  */
+  const getLocationName = async (lat: number, lng: number) => {
     try {
       const res = await axios.get(
         `https://nominatim.openstreetmap.org/reverse`,
@@ -91,24 +105,34 @@ const RideMap: React.FC = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await axios.post(
-        "http://localhost:5000/api/v1/rides/request",
-        {
-          pickupLatitude: pickup.lat,
-          pickupLongitude: pickup.lng,
-          destLatitude: destination.lat,
-          destLongitude: destination.lng,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // const token = localStorage.getItem("accessToken");
+      // const res = await axios.post(
+      //   "http://localhost:5000/api/v1/rides/request",
+      //   {
+      //     pickupLatitude: pickup.lat,
+      //     pickupLongitude: pickup.lng,
+      //     destLatitude: destination.lat,
+      //     destLongitude: destination.lng,
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   }
+      // );
+      const rideInfo = {
+        pickupLatitude: pickup.lat,
+        pickupLongitude: pickup.lng,
+        destLatitude: destination.lat,
+        destLongitude: destination.lng,
+      };
+      const result = await requestRide(rideInfo);
 
-      alert("Ride requested successfully!");
-      console.log("Ride Response:", res.data);
+      console.log("result from ride made:", result.data);
+
+      if (result?.data?.statusCode === 201) {
+        alert("Ride requested successfully!");
+      }
     } catch (error: any) {
       console.error(error);
       alert(error.response?.data?.message || "Failed to request ride");
