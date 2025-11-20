@@ -22,7 +22,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: ["User"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           // Reset the auth state
