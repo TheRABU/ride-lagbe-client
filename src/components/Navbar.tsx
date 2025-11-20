@@ -8,24 +8,39 @@ import { useIsUserLoggedInQuery } from "@/redux/features/auth/auth.api";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const { data, isLoading, isError } = useIsUserLoggedInQuery(undefined);
+  const { data, isLoading, isError, error } = useIsUserLoggedInQuery(undefined);
 
-  console.log("data from navbar", data, isLoading, isError);
+  console.log("user log data from navbar getMe::", data);
 
   if (isLoading) {
     return (
-      <div className="flex w-52 flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <div className="skeleton h-16 w-16 shrink-0 rounded-full"></div>
-          <div className="flex flex-col gap-4">
-            <div className="skeleton h-4 w-20"></div>
-            <div className="skeleton h-4 w-28"></div>
-          </div>
+      <>
+        <div className="h-screen flex items-center justify-center">
+          <span className="loading loading-bars loading-xl text-4xl text-blue-700 text-center"></span>
         </div>
-        <div className="skeleton h-32 w-full"></div>
+      </>
+    );
+  }
+
+  // Check if error is an authentication error (401/403) - this is normal for logged out users
+  const isAuthError =
+    isError &&
+    "status" in (error as any) &&
+    ((error as any).status === 401 || (error as any).status === 403);
+
+  // Only show error screen for non-auth errors (server errors, network issues, etc.)
+  if (isError && !isAuthError) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-red-600 text-xl font-semibold">
+          Something went wrong! Please try again later
+        </p>
       </div>
     );
   }
+
+  // User is logged in if we have successful data
+  const isLoggedIn = data?.success && data?.data;
 
   return (
     <>
@@ -60,7 +75,15 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
-          {!data?.data?.email && (
+          {/* {!data?.data?.email && (
+           
+          )} */}
+
+          {isLoggedIn ? (
+            <div>
+              <UserDropdown />
+            </div>
+          ) : (
             <div className="buttons hidden lg:flex items-center gap-2">
               <Link to={"/auth/login"}>
                 <button className="bg-[#FAF7F3] text-black px-3 py-1 rounded-4xl font-semibold hover:bg-gray-200">
@@ -73,12 +96,6 @@ const Navbar = () => {
                   Sign Up
                 </button>
               </Link>
-            </div>
-          )}
-
-          {data?.data?.email && (
-            <div>
-              <UserDropdown />
             </div>
           )}
 

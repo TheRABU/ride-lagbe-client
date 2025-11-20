@@ -22,6 +22,15 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: ["User"],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Reset the auth state
+          dispatch(baseApi.util.resetApiState());
+        } catch (error) {
+          console.error("Logout failed:", error);
+        }
+      },
     }),
     // userInfo: builder.query({
     //   query: () => ({
@@ -32,6 +41,9 @@ const authApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/user/me",
       }),
+      providesTags: ["User"],
+      // Don't refetch on mount/focus if we know user is logged out
+      keepUnusedDataFor: 0,
     }),
   }),
 });

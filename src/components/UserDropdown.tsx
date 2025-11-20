@@ -21,7 +21,7 @@ const UserDropdown = () => {
 
   const handleLogout = async () => {
     const result = await logout(undefined);
-
+    console.log("logout result::", result);
     if ("error" in result) {
       const error = result.error as any;
       toast.error(error.data?.message || "Failed to logout");

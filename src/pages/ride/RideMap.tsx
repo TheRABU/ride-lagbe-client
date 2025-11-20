@@ -42,8 +42,6 @@ const RideMap: React.FC = () => {
   const [requestRide] = useRequestRideMutation();
   const { data, isLoading: isLoadingRides } = useGetMyRideQuery(undefined);
 
-  console.log("GetMyRidesData::", data);
-
   // Reverse geocoding to get location name from coordinates
   const getLocationName = async (lat: number, lng: number): Promise<string> => {
     try {
