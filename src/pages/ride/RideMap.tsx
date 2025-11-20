@@ -13,6 +13,7 @@ import L from "leaflet";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
+  useDeleteRideMutation,
   useGetMyRideQuery,
   useRequestRideMutation,
 } from "@/redux/features/rides/ride.api";
@@ -41,7 +42,9 @@ const RideMap: React.FC = () => {
 
   const [requestRide] = useRequestRideMutation();
   const { data, isLoading: isLoadingRides } = useGetMyRideQuery(undefined);
+  const [deleteRide] = useDeleteRideMutation();
 
+  console.log("user's ride status::", data);
   // Reverse geocoding to get location name from coordinates
   const getLocationName = async (lat: number, lng: number): Promise<string> => {
     try {
@@ -136,6 +139,20 @@ const RideMap: React.FC = () => {
       // Clear destination after successful request
       setDestination(null);
       setDestinationName("");
+    }
+  };
+
+  // Delete a Ride
+
+  const handleDeleteRide = async (rideId: string) => {
+    try {
+      console.log("rideId is::", rideId);
+      const result = await deleteRide(rideId).unwrap();
+      toast.success("Ride cancelled successfully!");
+      console.log("deleted result", result);
+    } catch (error: any) {
+      console.log("error at deleting a ride", error.message);
+      toast.error(error?.data?.message || "Failed to cancel ride");
     }
   };
 
@@ -301,6 +318,14 @@ const RideMap: React.FC = () => {
                       <p className="text-slate-400">
                         Duration: {ride.duration} mins
                       </p>
+                    )}
+                    {ride._id && (
+                      <button
+                        onClick={() => handleDeleteRide(ride._id)}
+                        className="w-full rounded-2xl bg-red-500 text-white"
+                      >
+                        Cancel Ride
+                      </button>
                     )}
                   </div>
                 ))}

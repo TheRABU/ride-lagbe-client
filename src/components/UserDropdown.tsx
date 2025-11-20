@@ -20,7 +20,7 @@ const UserDropdown = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const result = await logout(undefined);
+    const result = await logout(undefined).unwrap();
     console.log("logout result::", result);
     if ("error" in result) {
       const error = result.error as any;

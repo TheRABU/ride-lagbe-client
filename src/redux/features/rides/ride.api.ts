@@ -25,7 +25,18 @@ const rideApi = baseApi.injectEndpoints({
       providesTags: ["Rides"],
       transformResponse: (response) => response.data,
     }),
+    deleteRide: builder.mutation({
+      query: (rideId) => ({
+        url: `/rides/${rideId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Rides"],
+    }),
   }),
 });
 
-export const { useRequestRideMutation, useGetMyRideQuery } = rideApi;
+export const {
+  useRequestRideMutation,
+  useGetMyRideQuery,
+  useDeleteRideMutation,
+} = rideApi;
