@@ -4,9 +4,28 @@ import { BsMenuButtonFill } from "react-icons/bs";
 import { useState } from "react";
 import UserDropdown from "./UserDropdown";
 import { ModeToggle } from "./mode.toggle";
+import { useIsUserLoggedInQuery } from "@/redux/features/auth/auth.api";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const { data, isLoading, isError } = useIsUserLoggedInQuery(undefined);
+
+  console.log("data from navbar", data, isLoading, isError);
+
+  if (isLoading) {
+    return (
+      <div className="flex w-52 flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <div className="skeleton h-16 w-16 shrink-0 rounded-full"></div>
+          <div className="flex flex-col gap-4">
+            <div className="skeleton h-4 w-20"></div>
+            <div className="skeleton h-4 w-28"></div>
+          </div>
+        </div>
+        <div className="skeleton h-32 w-full"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -41,26 +60,32 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
+          {!data?.data?.email && (
+            <div className="buttons hidden lg:flex items-center gap-2">
+              <Link to={"/auth/login"}>
+                <button className="bg-[#FAF7F3] text-black px-3 py-1 rounded-4xl font-semibold hover:bg-gray-200">
+                  Login
+                </button>
+              </Link>
 
-          <div className="buttons hidden lg:flex items-center gap-2">
-            <Link to={"/auth/login"}>
-              <button className="bg-[#FAF7F3] text-black px-3 py-1 rounded-4xl font-semibold hover:bg-gray-200">
-                Login
-              </button>
-            </Link>
+              <Link to={"/auth/sign-up"}>
+                <button className="bg-[#FAF7F3] text-black px-3 py-1 rounded-4xl font-semibold hover:bg-gray-200 ml-2">
+                  Sign Up
+                </button>
+              </Link>
+            </div>
+          )}
 
-            <Link to={"/auth/sign-up"}>
-              <button className="bg-[#FAF7F3] text-black px-3 py-1 rounded-4xl font-semibold hover:bg-gray-200 ml-2">
-                Sign Up
-              </button>
-            </Link>
-          </div>
+          {data?.data?.email && (
+            <div>
+              <UserDropdown />
+            </div>
+          )}
+
           <div className="ml-2">
             <ModeToggle />
           </div>
-          <div>
-            <UserDropdown />
-          </div>
+
           <div>
             <button
               className="block text-3xl lg:hidden"
