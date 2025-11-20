@@ -53,7 +53,9 @@ const SignIn = () => {
         navigate(from, { replace: true });
         reset();
       } else if (result?.error) {
-        const msg = result.error?.data?.message || "Login failed. Try again.";
+        const msg =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (result.error as any)?.data?.message || "Login failed. Try again.";
         setServerError(msg);
       }
 
