@@ -22,15 +22,31 @@ const rideApi = baseApi.injectEndpoints({
         url: "/rides/me",
         method: "GET",
       }),
-      providesTags: ["Rides"],
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => response.data, // your backend returns { data: [...] }
+      // providesTags: (result) =>
+      //   result
+      //     ? [
+      //         ...result.map((ride) => ({
+      //           type: "Rides",
+      //           id: ride._id,
+      //         })),
+      //         { type: "Rides", id: "LIST" },
+      //       ]
+      //     : [{ type: "Rides", id: "LIST" }],
     }),
     deleteRide: builder.mutation({
       query: (rideId) => ({
         url: `/rides/${rideId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Rides"],
+      // invalidatesTags: (result, error, rideId) => {
+      //   const deleted = result?.data?._id || rideId;
+
+      //   return [
+      //     { type: "Rides", id: deleted },
+      //     { type: "Rides", id: "LIST" },
+      //   ];
+      // },
     }),
   }),
 });
