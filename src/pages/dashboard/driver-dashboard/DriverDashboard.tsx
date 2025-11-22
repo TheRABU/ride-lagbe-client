@@ -2,13 +2,32 @@
 import ToggleSwitch from "@/components/ToggleSwitch";
 import { useLogoutMutation } from "@/redux/features/auth/auth.api";
 import {
+  useAcceptRideMutation,
+  useGetActiveRidesQuery,
   useGetDriverEarningsQuery,
   useIsDriverQuery,
+  useRejectRideMutation,
   useSetAvailabilityMutation,
 } from "@/redux/features/driver/driver.api";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+
+interface ActiveRide {
+  _id: string;
+  pickup_location: {
+    type: string;
+    coordinates: [number, number];
+  };
+  destination: {
+    type: string;
+    coordinates: [number, number];
+  };
+  trip_fare: number;
+  duration: number;
+  status: string;
+  user_id: string;
+}
 
 const DriverDashboard = () => {
   const { data: driverData, isLoading: isLoadingDriver } =
@@ -17,10 +36,16 @@ const DriverDashboard = () => {
   const [logout] = useLogoutMutation();
   const [setAvailability, { isLoading: isSettingAvailability }] =
     useSetAvailabilityMutation();
+  const { data: activeRides, isLoading: isActiveRidesLoading } =
+    useGetActiveRidesQuery(undefined);
+  const [acceptRide, { isLoading: isAccepting }] = useAcceptRideMutation();
+  const [rejectRide, { isLoading: isRejecting }] = useRejectRideMutation();
+
   const navigate = useNavigate();
 
   // Local state to track current status
   const [currentStatus, setCurrentStatus] = useState<string>("OFFLINE");
+  const [processingRideId, setProcessingRideId] = useState<string | null>(null);
 
   // Update local status when driver data loads
   useEffect(() => {
@@ -34,15 +59,40 @@ const DriverDashboard = () => {
 
     try {
       const result = await setAvailability({ status: newStatus }).unwrap();
-
-      // Update local state
       setCurrentStatus(newStatus);
-
       toast.success(`Status changed to ${newStatus}`);
       console.log("Availability updated:", result);
     } catch (error: any) {
       console.error("Error setting availability:", error);
       toast.error(error?.data?.message || "Failed to update availability");
+    }
+  };
+
+  const handleAcceptRide = async (rideId: string) => {
+    setProcessingRideId(rideId);
+    try {
+      const result = await acceptRide(rideId).unwrap();
+      toast.success("Ride accepted successfully!");
+      console.log("Ride accepted:", result);
+    } catch (error: any) {
+      console.error("Error accepting ride:", error);
+      toast.error(error?.data?.message || "Failed to accept ride");
+    } finally {
+      setProcessingRideId(null);
+    }
+  };
+
+  const handleRejectRide = async (rideId: string) => {
+    setProcessingRideId(rideId);
+    try {
+      const result = await rejectRide(rideId).unwrap();
+      toast.info("Ride rejected");
+      console.log("Ride rejected:", result);
+    } catch (error: any) {
+      console.error("Error rejecting ride:", error);
+      toast.error(error?.data?.message || "Failed to reject ride");
+    } finally {
+      setProcessingRideId(null);
     }
   };
 
@@ -55,6 +105,69 @@ const DriverDashboard = () => {
       console.error("Error at driver logout", error);
       toast.error(error?.data?.message || "Failed to logout");
     }
+  };
+
+  // State to store location names
+  const [locationNames, setLocationNames] = useState<{
+    [key: string]: { pickup: string; destination: string };
+  }>({});
+
+  // Reverse geocoding to get location name from coordinates
+  const getLocationName = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+      const data = await res.json();
+      return data.display_name || "Unknown location";
+    } catch (err) {
+      console.error("Reverse geocoding error:", err);
+      return "Unknown location";
+    }
+  };
+
+  // Fetch location names when activeRides changes
+  useEffect(() => {
+    const fetchLocationNames = async () => {
+      if (!activeRides || activeRides.length === 0) return;
+
+      const names: { [key: string]: { pickup: string; destination: string } } =
+        {};
+
+      for (const ride of activeRides) {
+        const pickupCoords = ride.pickup_location.coordinates;
+        const destCoords = ride.destination.coordinates;
+
+        const pickupName = await getLocationName(
+          pickupCoords[1],
+          pickupCoords[0]
+        );
+        const destName = await getLocationName(destCoords[1], destCoords[0]);
+
+        names[ride._id] = {
+          pickup: pickupName,
+          destination: destName,
+        };
+      }
+
+      setLocationNames(names);
+    };
+
+    fetchLocationNames();
+  }, [activeRides]);
+
+  // Helper to get formatted location or fallback to coordinates
+  const getLocationDisplay = (
+    rideId: string,
+    type: "pickup" | "destination",
+    coords: [number, number]
+  ) => {
+    const name = locationNames[rideId]?.[type];
+    if (name && name !== "Unknown location") {
+      const parts = name.split(",");
+      return parts.slice(0, 3).join(",");
+    }
+    return `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
   };
 
   if (isLoadingDriver) {
@@ -112,6 +225,26 @@ const DriverDashboard = () => {
               </svg>
               Dashboard
             </a>
+            <Link
+              to="/"
+              className="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              Home
+            </Link>
 
             <button
               onClick={handleLogout}
@@ -172,7 +305,8 @@ const DriverDashboard = () => {
             </span>
           </h1>
 
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4 h-auto">
+          {/* Stats Grid */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Earnings & Availability Card */}
             <div className="min-h-[350px] rounded-2xl bg-gradient-to-br from-green-300 to-green-400 border border-green-950 p-6 shadow-xl">
               <div className="mb-6">
@@ -230,36 +364,267 @@ const DriverDashboard = () => {
               </h2>
               <div className="space-y-3">
                 <div className="bg-white/50 rounded-lg p-3">
-                  <p className="text-sm text-neutral-700">Email</p>
-                  <p className="font-semibold">{driverData?.driver_email}</p>
+                  <p className="text-sm text-neutral-700">Name</p>
+                  <p className="font-semibold">{driverData?.driver_name}</p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-3">
-                  <p className="text-sm text-neutral-700">NID</p>
-                  <p className="font-semibold">{driverData?.driver_nid}</p>
+                  <p className="text-sm text-neutral-700">Email</p>
+                  <p className="font-semibold text-sm break-all">
+                    {driverData?.driver_email}
+                  </p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-3">
                   <p className="text-sm text-neutral-700">Vehicle</p>
                   <p className="font-semibold">
                     {driverData?.vehicle?.model} ({driverData?.vehicle?.color})
                   </p>
+                  <p className="text-sm text-neutral-600">
+                    {driverData?.vehicle?.licensePlate} •{" "}
+                    {driverData?.vehicle?.year}
+                  </p>
                 </div>
               </div>
             </div>
+          </section>
 
-            {/* Additional Cards */}
-            <div className="min-h-[350px] rounded-2xl bg-gradient-to-br from-pink-300 to-pink-400 p-6 shadow-xl">
-              <h2 className="text-neutral-900 font-semibold text-xl">
-                Recent Rides
+          {/* Active Rides Section */}
+          <section className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-neutral-900">
+                Available Rides
               </h2>
-              <p className="text-neutral-700 mt-2">Coming soon...</p>
+              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                {activeRides?.length || 0} rides
+              </span>
             </div>
 
-            <div className="min-h-[350px] rounded-2xl bg-gradient-to-br from-orange-300 to-orange-400 p-6 shadow-xl">
-              <h2 className="text-neutral-900 font-semibold text-xl">
-                Ratings & Reviews
-              </h2>
-              <p className="text-neutral-700 mt-2">Coming soon...</p>
-            </div>
+            {isActiveRidesLoading ? (
+              <div className="flex items-center justify-center py-12 bg-white rounded-2xl shadow-lg">
+                <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+              </div>
+            ) : activeRides && activeRides.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {activeRides.map((ride: ActiveRide) => (
+                  <div
+                    key={ride._id}
+                    className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200 hover:border-blue-400 transition-all duration-300"
+                  >
+                    {/* Ride Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        {ride.status}
+                      </span>
+                      <span className="text-2xl font-bold text-neutral-900">
+                        BDT {ride.trip_fare}৳
+                      </span>
+                    </div>
+
+                    {/* Trip Details */}
+                    <div className="space-y-4 mb-6">
+                      {/* Pickup Location */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500 font-medium">
+                            Pickup Location
+                          </p>
+                          <p className="text-sm text-gray-800 break-words">
+                            {locationNames[ride._id]?.pickup || (
+                              <span className="text-gray-400">
+                                Loading address...
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Connecting Line */}
+                      <div className="ml-4 border-l-2 border-dashed border-gray-300 h-6"></div>
+
+                      {/* Destination */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500 font-medium">
+                            Destination
+                          </p>
+                          <p className="text-sm text-gray-800 break-words">
+                            {locationNames[ride._id]?.destination || (
+                              <span className="text-gray-400">
+                                Loading address...
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Trip Duration */}
+                      <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-gray-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span className="text-sm font-semibold text-gray-700">
+                          Estimated Duration: {ride.duration} mins
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleAcceptRide(ride._id)}
+                        disabled={
+                          isAccepting ||
+                          isRejecting ||
+                          processingRideId === ride._id
+                        }
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {processingRideId === ride._id && isAccepting ? (
+                          <>
+                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                            Accepting...
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Accept
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleRejectRide(ride._id)}
+                        disabled={
+                          isAccepting ||
+                          isRejecting ||
+                          processingRideId === ride._id
+                        }
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {processingRideId === ride._id && isRejecting ? (
+                          <>
+                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                            Rejecting...
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                            Reject
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-16 w-16 mx-auto text-gray-400 mb-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  No Active Rides
+                </h3>
+                <p className="text-gray-500">
+                  There are no ride requests available at the moment.
+                  {currentStatus === "OFFLINE" && (
+                    <span className="block mt-2 text-blue-600 font-semibold">
+                      Set your status to ONLINE to receive ride requests!
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </div>
