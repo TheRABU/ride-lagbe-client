@@ -13,15 +13,18 @@ import { FaUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router";
 import { baseApi } from "@/redux/baseApi";
+import { useIsDriverQuery } from "@/redux/features/driver/driver.api";
 
 const UserDropdown = () => {
+  const { data } = useIsDriverQuery(undefined);
   const [logout, { isLoading }] = useLogoutMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  console.log("check if user is driver forntend", data?.driver_email);
+
   const handleLogout = async () => {
     const result = await logout(undefined).unwrap();
-    console.log("logout result::", result);
     if ("error" in result) {
       const error = result.error as any;
       toast.error(error.data?.message || "Failed to logout");
@@ -46,11 +49,20 @@ const UserDropdown = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
             </Link>
             <DropdownMenuSeparator />
+            {data?.driver_email && (
+              <DropdownMenuItem>
+                <Link to={"/dashboard/driver"} className="w-full">
+                  Driver Dashboard
+                </Link>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuItem>
               <Link to={"/dashboard/user/profile"} className="w-full">
                 Profile
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuItem>
               <Link to={"/dashboard/user/billing"} className="w-full">
                 Billing

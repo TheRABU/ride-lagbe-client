@@ -9,6 +9,7 @@ import UserDashboard from "@/pages/dashboard/user-dashboard/UserDashboard";
 import RideLayout from "@/layouts/RideLayout";
 import RideMap from "@/pages/ride/RideMap";
 import CreateProfile from "@/pages/driver/CreateProfile";
+import DriverDashboard from "@/pages/dashboard/driver-dashboard/DriverDashboard";
 
 const AllRoutes = () => {
   const routes = createBrowserRouter([
@@ -47,6 +48,10 @@ const AllRoutes = () => {
         {
           path: "/dashboard/user",
           element: <UserDashboard />,
+        },
+        {
+          path: "/dashboard/driver",
+          element: <DriverDashboard />,
         },
       ],
     },

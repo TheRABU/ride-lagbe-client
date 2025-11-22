@@ -1,4 +1,39 @@
+import { useLogoutMutation } from "@/redux/features/auth/auth.api";
+import {
+  useGetDriverEarningsQuery,
+  useIsDriverQuery,
+} from "@/redux/features/driver/driver.api";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+
 const DriverDashboard = () => {
+  const { data: isDriver } = useIsDriverQuery(undefined);
+
+  // for driver earning
+  const { data: driverEarning } = useGetDriverEarningsQuery(undefined);
+
+  //logout
+  const [logout] = useLogoutMutation();
+
+  const navigate = useNavigate();
+
+  console.log(driverEarning);
+
+  const handleLogout = async () => {
+    try {
+      const result = await logout(undefined).unwrap();
+      if ("error" in result) {
+        const error = result.error as any;
+        toast.error(error.data?.message || "Failed to logout");
+      } else {
+        toast.success("Logged out successfully!");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error at driver logout", error);
+    }
+  };
+
   return (
     <>
       <div className="flex h-screen bg-gray-100">
@@ -46,41 +81,6 @@ const DriverDashboard = () => {
                   />
                 </svg>
                 Dashboard
-              </a>
-
-              <a
-                href="#"
-                className="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 group"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="group-hover:hidden h-6 w-6 mr-2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="hidden group-hover:block h-6 w-6 mr-2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                  />
-                </svg>
-                Login
               </a>
 
               <div className="mb-2 relative group">
@@ -267,6 +267,40 @@ const DriverDashboard = () => {
                     Subitem 2
                   </a>
                 </div>
+                <button
+                  onClick={() => handleLogout()}
+                  className="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 group"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="group-hover:hidden h-6 w-6 mr-2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                  </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="hidden group-hover:block h-6 w-6 mr-2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                    />
+                  </svg>
+                  Logout
+                </button>
               </div>
             </nav>
           </div>
@@ -333,11 +367,32 @@ const DriverDashboard = () => {
               </button>
             </div>
           </div>
-          <div className="p-4">
-            <h1 className="text-2xl font-bold">Welcome to my dashboard!</h1>
-            <p className="mt-2 text-gray-600">
-              This is an example dashboard using Tailwind CSS.
-            </p>
+          <div className="p-4 bg-[#F9F8F6]">
+            <h1 className="text-2xl font-bold">
+              Welcome to your dashboard,{" "}
+              <span className="text-neutral-800 font-semibold">
+                {isDriver?.driver_name}
+              </span>
+            </h1>
+            <section className="grid grid-cols-2 gap-4 h-auto shadow-xl rounded-2xl p-3">
+              <div className="max-w-[400px] h-[350px] rounded-2xl bg-green-300">
+                <div>
+                  <h2 className="text-neutral-900 font-semibold text-xl">
+                    Earnings up until now
+                  </h2>
+                  <span>BDT {driverEarning}</span>
+                </div>
+              </div>
+              <div className="max-w-[400px] h-[350px] rounded-2xl bg-blue-300">
+                2
+              </div>
+              <div className="max-w-[400px] h-[350px] rounded-2xl bg-pink-300">
+                3
+              </div>
+              <div className="max-w-[400px] h-[350px] rounded-2xl bg-orange-300">
+                4
+              </div>
+            </section>
           </div>
         </div>
       </div>

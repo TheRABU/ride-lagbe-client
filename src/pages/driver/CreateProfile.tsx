@@ -1,4 +1,67 @@
+import { useCreateDriverProfileMutation } from "@/redux/features/driver/driver.api";
+import { useLocation, useNavigate } from "react-router";
+import { toast } from "react-toastify";
+
 const CreateProfile = () => {
+  const [createDriverProfile, { isLoading }] = useCreateDriverProfileMutation();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // test
+
+  const handleSubmitRequest = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const nid = (form.elements.namedItem("nid") as HTMLInputElement).value;
+    const model = (form.elements.namedItem("model") as HTMLInputElement).value;
+    const license = (form.elements.namedItem("license") as HTMLInputElement)
+      .value;
+    const color = (form.elements.namedItem("color") as HTMLInputElement).value;
+    const year = (form.elements.namedItem("year") as HTMLInputElement).value;
+
+    const vehicle = {
+      model,
+      licensePlate: license,
+      color,
+      year: Number(year),
+    };
+
+    const payload = {
+      driver_name: name,
+      driver_nid: nid,
+      vehicle,
+    };
+
+    try {
+      const result = await createDriverProfile(payload).unwrap();
+      if (result.success || result.statusCode === 201) {
+        toast.success("Driver's account created successfully!");
+
+        form.reset();
+
+        const from = location.state?.from?.pathname || "/";
+        navigate(from, { replace: true });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("vai pathaite parinai", err);
+      toast.error("Something went wrong please try later");
+      if (err.status === 401 || err.status === 403) {
+        toast.error("Please login to create a driver profile");
+      } else if (err.status === 400) {
+        toast.error(err.data?.message || "Invalid data provided");
+      } else if (err.message) {
+        toast.error(err.message);
+      } else {
+        toast.error("Something went wrong, please try later");
+      }
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -11,23 +74,14 @@ const CreateProfile = () => {
           <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-gray-900">
             Create A new Driver Account
           </h2>
-          {/* <p className="mt-2 text-center text-sm leading-5 text-gray-500 max-w">
-            Or
-            <a
-              href="#"
-              className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline transition ease-in-out duration-150"
-            >
-              login to your account
-            </a>
-          </p> */}
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form method="POST" action="#">
+            <form onSubmit={handleSubmitRequest}>
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="name"
                   className="block text-sm font-medium leading-5  text-gray-700"
                 >
                   Name
@@ -39,6 +93,7 @@ const CreateProfile = () => {
                     placeholder="John Doe"
                     type="text"
                     required
+                    disabled={isLoading}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                   />
                   <div className="hidden absolute inset-y-0 right-0 pr-3 md:flex items-center pointer-events-none">
@@ -70,6 +125,7 @@ const CreateProfile = () => {
                     placeholder="271-98789-90"
                     type="text"
                     required
+                    disabled={isLoading}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                   />
                   <div className="hidden absolute inset-y-0 right-0 pr-3 md:flex items-center pointer-events-none">
@@ -109,6 +165,7 @@ const CreateProfile = () => {
                     placeholder="toyota corolla"
                     type="text"
                     required
+                    disabled={isLoading}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                   />
                 </div>
@@ -131,6 +188,7 @@ const CreateProfile = () => {
                     placeholder="DHK-796799"
                     type="text"
                     required
+                    disabled={isLoading}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                   />
                 </div>
@@ -153,6 +211,7 @@ const CreateProfile = () => {
                     placeholder="black/red"
                     type="text"
                     required
+                    disabled={isLoading}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                   />
                 </div>
@@ -185,7 +244,7 @@ const CreateProfile = () => {
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out"
                   >
-                    Create account
+                    {isLoading ? "Creating account..." : "Create account"}
                   </button>
                 </span>
               </div>

@@ -15,7 +15,7 @@ const rideApi = baseApi.injectEndpoints({
         method: "POST",
         body: rideInfo,
       }),
-      invalidatesTags: ["Rides"],
+      invalidatesTags: ["RIDES"],
     }),
     getMyRide: builder.query({
       query: () => ({

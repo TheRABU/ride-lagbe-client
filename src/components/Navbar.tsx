@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router";
 import { BsFillMenuButtonWideFill } from "react-icons/bs";
 import { BsMenuButtonFill } from "react-icons/bs";

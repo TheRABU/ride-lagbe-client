@@ -21,7 +21,7 @@ const authApi = baseApi.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["USER"],
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -41,7 +41,7 @@ const authApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/user/me",
       }),
-      providesTags: ["User"],
+      providesTags: ["USER"],
       // Don't refetch on mount/focus if we know user is logged out
       keepUnusedDataFor: 0,
     }),

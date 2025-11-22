@@ -8,7 +8,7 @@ const driverApi = baseApi.injectEndpoints({
         method: "POST",
         body: driverInfo,
       }),
-      invalidatesTags: ["Driver"],
+      invalidatesTags: ["DRIVER"],
     }),
     setAvailability: builder.mutation({
       query: (driverInfo) => ({
@@ -16,14 +16,35 @@ const driverApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: driverInfo,
       }),
-      invalidatesTags: ["Driver"],
+      invalidatesTags: ["DRIVER"],
     }),
     acceptRide: builder.mutation({
       query: (rideId) => ({
         url: `/drivers/accept/${rideId}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Driver"],
+      invalidatesTags: ["DRIVER"],
+    }),
+    getAllDrivers: builder.query({
+      query: () => ({
+        url: "/drivers/all-drivers",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+    }),
+    isDriver: builder.query({
+      query: () => ({
+        url: "/drivers/is-driver",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+    }),
+    getDriverEarnings: builder.query({
+      query: () => ({
+        url: "/drivers/earnings",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
     }),
   }),
 });
@@ -32,4 +53,7 @@ export const {
   useCreateDriverProfileMutation,
   useSetAvailabilityMutation,
   useAcceptRideMutation,
+  useGetAllDriversQuery,
+  useIsDriverQuery,
+  useGetDriverEarningsQuery,
 } = driverApi;
