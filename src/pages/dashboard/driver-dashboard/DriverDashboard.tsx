@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ToggleSwitch from "@/components/ToggleSwitch";
 import { useLogoutMutation } from "@/redux/features/auth/auth.api";
@@ -158,18 +157,19 @@ const DriverDashboard = () => {
   }, [activeRides]);
 
   // Helper to get formatted location or fallback to coordinates
-  const getLocationDisplay = (
-    rideId: string,
-    type: "pickup" | "destination",
-    coords: [number, number]
-  ) => {
-    const name = locationNames[rideId]?.[type];
-    if (name && name !== "Unknown location") {
-      const parts = name.split(",");
-      return parts.slice(0, 3).join(",");
-    }
-    return `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
-  };
+  //   const getLocationDisplay = (
+  //     rideId: string,
+  //     type: "pickup" | "destination",
+  //     coords: [number, number]
+  //   ) => {
+  //     const name = locationNames[rideId]?.[type];
+  //     if (name && name !== "Unknown location") {
+  //       // Shorten long addresses
+  //       const parts = name.split(",");
+  //       return parts.slice(0, 3).join(",");
+  //     }
+  //     return `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
+  //   };
 
   if (isLoadingDriver) {
     return (
@@ -415,8 +415,8 @@ const DriverDashboard = () => {
                       <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
                         {ride.status}
                       </span>
-                      <span className="text-2xl font-bold text-neutral-900">
-                        BDT {ride.trip_fare}৳
+                      <span className="text-2xl font-bold text-green-600">
+                        ৳{ride.trip_fare}
                       </span>
                     </div>
 
