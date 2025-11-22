@@ -10,8 +10,6 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { data, isLoading, isError, error } = useIsUserLoggedInQuery(undefined);
 
-  console.log("user log data from navbar getMe::", data);
-
   if (isLoading) {
     return (
       <>
@@ -73,6 +71,14 @@ const Navbar = () => {
               <li className="hover:text-gray-300 cursor-pointer border-neutral-200 border rounded-4xl px-3 py-1 bg-neutral-700">
                 Contact
               </li>
+              {data?.data?.email && (
+                <Link
+                  to={"/driver/create"}
+                  className="hover:text-gray-300 cursor-pointer border-neutral-200 border rounded-4xl px-3 py-1 bg-neutral-700"
+                >
+                  Join Driver
+                </Link>
+              )}
             </ul>
           </div>
           {/* {!data?.data?.email && (
