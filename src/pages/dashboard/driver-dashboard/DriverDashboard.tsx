@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ToggleSwitch from "@/components/ToggleSwitch";
 import { useLogoutMutation } from "@/redux/features/auth/auth.api";
