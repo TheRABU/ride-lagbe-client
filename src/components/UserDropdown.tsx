@@ -56,7 +56,7 @@ const UserDropdown = () => {
                 </Link>
               </DropdownMenuItem>
             )}
-
+            {/* 
             <DropdownMenuItem>
               <Link to={"/dashboard/user/profile"} className="w-full">
                 Profile
@@ -77,7 +77,7 @@ const UserDropdown = () => {
               <Link to={"/dashboard/user/subscription"} className="w-full">
                 Subscription
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}

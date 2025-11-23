@@ -22,15 +22,15 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: ["USER"],
-      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          // Reset the auth state
-          dispatch(baseApi.util.resetApiState());
-        } catch (error) {
-          console.error("Logout failed:", error);
-        }
-      },
+      // async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+      //   try {
+      //     await queryFulfilled;
+      //     // Reset the auth state
+      //     dispatch(baseApi.util.resetApiState());
+      //   } catch (error) {
+      //     console.error("Logout failed:", error);
+      //   }
+      // },
     }),
     // userInfo: builder.query({
     //   query: () => ({

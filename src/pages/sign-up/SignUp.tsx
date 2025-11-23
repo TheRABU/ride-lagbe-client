@@ -54,15 +54,14 @@ const SignUp = () => {
       const result = await registerUser(userInfo).unwrap();
       if (result.statusCode === 201) {
         Swal.fire({
-          position: "top-start",
+          position: "center",
           icon: "success",
-          title: "Your work has been saved",
+          title: "Account created now login using that account",
           showConfirmButton: false,
           timer: 1500,
         });
       }
       navigate(from, { replace: true });
-      console.log("result of signup", result);
     } catch (error: any) {
       console.log("Error at::", error.message);
     }

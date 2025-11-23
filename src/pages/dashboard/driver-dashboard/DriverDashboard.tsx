@@ -156,6 +156,13 @@ const DriverDashboard = () => {
     fetchLocationNames();
   }, [activeRides]);
 
+  /*
+
+    check the ride status
+
+
+  */
+
   // Helper to get formatted location or fallback to coordinates
   //   const getLocationDisplay = (
   //     rideId: string,

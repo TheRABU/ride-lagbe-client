@@ -23,7 +23,7 @@ const driverApi = baseApi.injectEndpoints({
         url: `/drivers/accept/${rideId}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["DRIVER"],
+      invalidatesTags: ["DRIVER", "RIDES"],
     }),
     rejectRide: builder.mutation({
       query: (rideId) => ({
@@ -38,6 +38,7 @@ const driverApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => response.data,
+      providesTags: ["DRIVER"],
     }),
     isDriver: builder.query({
       query: () => ({
@@ -45,6 +46,7 @@ const driverApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => response.data,
+      providesTags: ["DRIVER"],
     }),
     getDriverEarnings: builder.query({
       query: () => ({
@@ -52,6 +54,7 @@ const driverApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => response.data,
+      providesTags: ["DRIVER"],
     }),
     getActiveRides: builder.query({
       query: () => ({
@@ -59,6 +62,7 @@ const driverApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => response.data,
+      providesTags: ["DRIVER", "RIDES"],
     }),
   }),
 });
