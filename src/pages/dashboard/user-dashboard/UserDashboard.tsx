@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useIsUserLoggedInQuery } from "@/redux/features/auth/auth.api";
 import {
   useDeleteRideMutation,
@@ -256,15 +257,15 @@ const UserDashboard = () => {
                 <div className="bg-white/50 rounded-lg p-3">
                   <p className="text-sm text-neutral-700">Requested</p>
                   <p className="text-2xl font-semibold">
-                    {myRides?.filter((r) => r.status === "REQUESTED").length ||
-                      0}
+                    {myRides?.filter((r: MyRide) => r.status === "REQUESTED")
+                      .length || 0}
                   </p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-3">
                   <p className="text-sm text-neutral-700">Completed</p>
                   <p className="text-2xl font-semibold">
-                    {myRides?.filter((r) => r.status === "COMPLETED").length ||
-                      0}
+                    {myRides?.filter((r: MyRide) => r.status === "COMPLETED")
+                      .length || 0}
                   </p>
                 </div>
                 <div className="bg-white/50 rounded-lg p-3">
@@ -272,8 +273,11 @@ const UserDashboard = () => {
                   <p className="text-2xl font-semibold">
                     ৳
                     {myRides
-                      ?.filter((r) => r.status === "COMPLETED")
-                      .reduce((sum, r) => sum + r.trip_fare, 0) || 0}
+                      ?.filter((r: MyRide) => r.status === "COMPLETED")
+                      .reduce(
+                        (sum: number, r: MyRide) => sum + r.trip_fare,
+                        0
+                      ) || 0}
                   </p>
                 </div>
               </div>
